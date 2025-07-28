@@ -1,0 +1,63 @@
+.vnforge-admin-container {
+    max-width: 800px;
+    margin: 20px 0;
+}
+
+.vnforge-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.vnforge-section h2 {
+    margin-top: 0;
+    color: #23282d;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.vnforge-image-preview {
+    max-width: 100%;
+    min-height: 300px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    position: relative;
+    text-align: center;
+}
+
+.vnforge-image-preview img {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 4px;
+}
+
+.vnforge-no-image {
+    color: #666;
+    font-style: italic;
+}
+
+.vnforge-image-controls {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.vnforge-image-controls .button {
+    margin: 0 5px;
+}
+
+.vnforge-markers-list {
+    min-height: 200px;
+}
+
+.vnforge-no-markers {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 40px;
+}
