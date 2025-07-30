@@ -62,3 +62,10 @@ image-marker-plugin/
 
 ## License
 GPL v2 or later 
+
+## Features:
+[] Marker image
+[] Thêm custom css
+[] Thêm api get note từ vnforge
+[] Request premium feature
+[] Report error

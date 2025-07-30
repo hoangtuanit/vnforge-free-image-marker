@@ -1,3 +1,6 @@
+/* Admin Styles for VNForge Image Marker */
+
+/* Layout Styles */
 .vnforge-admin-container {
     max-width: 800px;
     margin: 20px 0;
@@ -29,6 +32,7 @@
     margin-bottom: 15px;
     position: relative;
     text-align: center;
+    overflow: hidden;
 }
 
 .vnforge-image-preview img {
@@ -60,4 +64,197 @@
     color: #666;
     font-style: italic;
     padding: 40px;
+}
+
+/* Clickable Image Styles */
+.vnforge-image-preview.vnforge-clickable {
+    cursor: crosshair;
+}
+
+.vnforge-image-preview.vnforge-clickable img {
+    cursor: crosshair;
+}
+
+.vnforge-image-preview.vnforge-clickable::after {
+    content: "Click anywhere to add marker";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 5;
+}
+
+/* Dialog Styles */
+.vnforge-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vnforge-dialog-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.vnforge-dialog h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #23282d;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.vnforge-dialog label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.vnforge-dialog input[type="text"],
+.vnforge-dialog input[type="url"],
+.vnforge-dialog textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.vnforge-dialog input[type="text"]:focus,
+.vnforge-dialog input[type="url"]:focus,
+.vnforge-dialog textarea:focus {
+    border-color: #0073aa;
+    outline: none;
+    box-shadow: 0 0 0 1px #0073aa;
+}
+
+.vnforge-dialog-buttons {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.vnforge-dialog-buttons .button {
+    margin-left: 10px;
+}
+
+/* Marker Styles */
+.vnforge-marker-container {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.vnforge-marker {
+    width: 20px;
+    height: 20px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    cursor: move;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+}
+
+.vnforge-marker:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.vnforge-marker-delete {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    background-color: #000;
+    color: #fff;
+    border-radius: 50%;
+    border: 1px solid #fff;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: center;
+    font-weight: bold;
+    z-index: 11;
+    display: none;
+    transition: all 0.2s ease;
+}
+
+.vnforge-marker-delete:hover {
+    background-color: #000;
+    transform: scale(1.1);
+}
+
+/* Coordinate tooltip */
+.vnforge-coordinate-tooltip {
+    position: fixed;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    font-family: monospace;
+}
+
+/* Image Preview Container */
+.vnforge-image-preview {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Save Section Styles */
+.vnforge-save-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.vnforge-save-section p {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    color: #23282d;
+}
+
+.vnforge-save-section input[type="text"] {
+    margin-right: 10px;
+    min-width: 200px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vnforge-dialog-content {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .vnforge-dialog-buttons {
+        text-align: center;
+    }
+    
+    .vnforge-dialog-buttons .button {
+        margin: 5px;
+    }
 }
