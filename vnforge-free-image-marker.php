@@ -39,6 +39,7 @@ class VNForge_Image_Marker {
         add_action('wp_ajax_vnforge_delete_marker', array($this, 'delete_marker'));
         add_action('wp_ajax_vnforge_reset', array($this, 'reset'));
         add_action('wp_ajax_vnforge_get_markers_list', array($this, 'get_markers_list'));
+        add_action('wp_ajax_vnforge_save_settings', array($this, 'save_settings'));
         
         // Add metabox for marker post type
         add_action('add_meta_boxes', array($this, 'add_marker_metabox'));
@@ -322,7 +323,7 @@ class VNForge_Image_Marker {
         });
         
         // Save updated markers
-        $result = update_post_meta($post_id, '_vnforge_markers', $markers);
+        $result = update_post_meta($post_id, '_vnforge_markers', array_values($markers));
         
         if ($result) {
             wp_send_json_success('Marker deleted successfully');
@@ -501,6 +502,11 @@ class VNForge_Image_Marker {
         // Get markers data
         $markers = get_post_meta($marker_post_id, '_vnforge_markers', true);
         
+        // Get settings
+        $marker_color = get_option('vnforge_marker_color', '#ff0000');
+        $marker_size = get_option('vnforge_marker_size', '20');
+        $custom_css = get_option('vnforge_custom_css', '');
+        
         // Build output
         $output = '<div class="vnforge-image-with-markers" data-image-id="' . $image_id . '">';
         $output .= $image_html;
@@ -513,8 +519,62 @@ class VNForge_Image_Marker {
         }
         
         $output .= '</div>';
+
+        $css = "
+        .vnforge-marker {
+            background-color: {$marker_color} !important;
+            width: {$marker_size}px !important;
+            height: {$marker_size}px !important;
+        }
+        ";
+        
+        // Add custom CSS if exists
+        if (!empty($custom_css)) {
+            $css .= $custom_css;
+        }
+
+        $output .= '<style class="vnforge-marker-css">' . $css . '</style>';
         
         return $output;
+    }
+    
+    /**
+     * Save plugin settings
+     */
+    public function save_settings() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vnforge_admin_nonce')) {
+            wp_send_json_error('Security check failed');
+        }
+        
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        // Sanitize and save settings
+        $marker_color = sanitize_hex_color($_POST['marker_color']);
+        $marker_size = intval($_POST['marker_size']);
+        $custom_css = sanitize_textarea_field($_POST['custom_css']);
+        
+        // Validate marker size
+        if ($marker_size < 10 || $marker_size > 50) {
+            $marker_size = 20; // Default value
+        }
+        
+        // Save settings to WordPress options
+        update_option('vnforge_marker_color', $marker_color);
+        update_option('vnforge_marker_size', $marker_size);
+        update_option('vnforge_custom_css', $custom_css);
+        
+        wp_send_json_success(array(
+            'message' => 'Settings saved successfully',
+            'settings' => array(
+                'marker_color' => $marker_color,
+                'marker_size' => $marker_size,
+                'custom_css' => $custom_css
+            )
+        ));
     }
 }
 

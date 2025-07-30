@@ -26,6 +26,10 @@ jQuery(document).ready(function($) {
             clearMarkers();
         });
         
+        // Initialize settings
+        initSettings();
+        applyCustomCSS();
+        
         // Initialize existing image if present
         var imagePreview = $('#vnforge-image-preview');
         var existingImage = imagePreview.find('img');
@@ -384,6 +388,10 @@ jQuery(document).ready(function($) {
 
         console.log('addMarkerToImage@MarkerData:', markerData);
         
+        // Get current settings
+        var markerColor = $('#vnforge-marker-color').val() || '#ff0000';
+        var markerSize = $('#vnforge-marker-size').val() || '20';
+        
         // Sử dụng trực tiếp giá trị percentage từ markerData
         var left = markerData.x;
         var top = markerData.y;
@@ -405,17 +413,17 @@ jQuery(document).ready(function($) {
             'data-marker': JSON.stringify(markerData)
         });
         
-        // Create marker element
+        // Create marker element with settings
         var marker = $('<div>', {
             class: 'vnforge-marker',
             css: {
-                width: '20px',
-                height: '20px',
-                backgroundColor: '#ff0000',
+                width: markerSize + 'px',
+                height: markerSize + 'px',
+                backgroundColor: markerColor,
                 zIndex: 11,
                 borderRadius: '50%',
                 border: '2px solid #fff',
-                cursor: 'move',
+                cursor: 'pointer',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
             }
         });
@@ -480,7 +488,7 @@ jQuery(document).ready(function($) {
         // Update hidden markers field
         updateHiddenMarkersField();
         
-        console.log('Visual marker added');
+        console.log('Visual marker added with settings:', { color: markerColor, size: markerSize });
     }
     
     /**
@@ -704,6 +712,111 @@ jQuery(document).ready(function($) {
         $('#vnforge-image-preview').find('.vnforge-marker').remove();
         reset();
         console.log('Hidden markers field cleared');
+    }
+    
+    /**
+     * Initialize settings functionality
+     */
+    function initSettings() {
+        // Save settings button
+        $('#vnforge-save-settings').on('click', function(e) {
+            e.preventDefault();
+            saveSettings();
+        });
+        
+        // Reset settings button
+        $('#vnforge-reset-settings').on('click', function(e) {
+            e.preventDefault();
+            resetSettings();
+        });
+        
+        // Live preview for color and size changes
+        $('#vnforge-marker-color, #vnforge-marker-size').on('change', function() {
+            updateMarkerPreview();
+        });
+    }
+    
+    /**
+     * Save settings
+     */
+    function saveSettings() {
+        var settings = {
+            marker_color: $('#vnforge-marker-color').val(),
+            marker_size: $('#vnforge-marker-size').val(),
+            custom_css: $('#vnforge-custom-css').val()
+        };
+        
+        console.log('Saving settings:', settings);
+        
+        // Send AJAX request to save settings
+        makeAjaxRequest('vnforge_save_settings', settings, function(response) {
+            showAdminMessage('Settings saved successfully!', 'success');
+            
+            // Update existing markers with new settings
+            updateAllMarkersWithSettings();
+        });
+    }
+    
+    /**
+     * Reset settings to default
+     */
+    function resetSettings() {
+        if (confirm('Are you sure you want to reset all settings to default?')) {
+            $('#vnforge-marker-color').val('#ff0000');
+            $('#vnforge-marker-size').val('20');
+            $('#vnforge-custom-css').val('');
+            
+            // Save reset settings
+            saveSettings();
+            
+            showAdminMessage('Settings reset to default!', 'success');
+        }
+    }
+    
+    /**
+     * Update marker preview with current settings
+     */
+    function updateMarkerPreview() {
+        var color = $('#vnforge-marker-color').val();
+        var size = $('#vnforge-marker-size').val();
+        
+        // Update existing markers
+        $('.vnforge-marker').css({
+            backgroundColor: color,
+            width: size + 'px',
+            height: size + 'px'
+        });
+    }
+    
+    /**
+     * Update all existing markers with current settings
+     */
+    function updateAllMarkersWithSettings() {
+        var color = $('#vnforge-marker-color').val();
+        var size = $('#vnforge-marker-size').val();
+        
+        $('.vnforge-marker').css({
+            backgroundColor: color,
+            width: size + 'px',
+            height: size + 'px'
+        });
+        
+        console.log('Updated all markers with new settings');
+    }
+    
+    /**
+     * Apply custom CSS
+     */
+    function applyCustomCSS() {
+        var customCSS = $('#vnforge-custom-css').val();
+        
+        // Remove existing custom CSS
+        $('#vnforge-custom-css-style').remove();
+        
+        if (customCSS.trim()) {
+            var styleTag = $('<style id="vnforge-custom-css-style">' + customCSS + '</style>');
+            $('head').append(styleTag);
+        }
     }
     
 });
