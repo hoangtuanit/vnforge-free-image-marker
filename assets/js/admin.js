@@ -390,7 +390,6 @@ jQuery(document).ready(function($) {
                 position: 'absolute',
                 left: left + '%',
                 top: top + '%',
-                transform: 'translate(-50%, -50%)',
                 zIndex: 10
             },
             'data-marker': JSON.stringify(markerData)
@@ -766,15 +765,15 @@ jQuery(document).ready(function($) {
             updateHiddenMarkersField();
             
                     // Show success message
-        showAdminMessage('Marker deleted successfully!', 'success');
-        
-        // Show info message about remaining markers
-        var remainingMarkers = $('#vnforge-image-preview').find('.vnforge-marker-container').length;
-        if (remainingMarkers > 0) {
-            showAdminMessage(remainingMarkers + ' markers remaining', 'info');
-        }
-        
-        console.log('Marker deleted:', markerData);
+            showAdminMessage('Marker deleted successfully!', 'success');
+            
+            // Show info message about remaining markers
+            var remainingMarkers = $('#vnforge-image-preview').find('.vnforge-marker-container').length;
+            if (remainingMarkers > 0) {
+                showAdminMessage(remainingMarkers + ' markers remaining', 'info');
+            }
+            
+            console.log('Marker deleted:', markerData);
 
             // Send AJAX request to delete marker
             makeAjaxRequest('vnforge_delete_marker', {
