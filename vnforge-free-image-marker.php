@@ -149,6 +149,13 @@ class VNForge_Image_Marker {
             array(),
             VNFORGE_IMAGE_MARKER_VERSION
         );
+
+        wp_enqueue_style(
+            'vnforge-image-marker-common',
+            VNFORGE_IMAGE_MARKER_PLUGIN_URL . 'assets/css/common.css',
+            array(),
+            VNFORGE_IMAGE_MARKER_VERSION
+        );
         
         // Localize script
         wp_localize_script('vnforge-image-marker-frontend', 'vnforge_ajax', array(
@@ -184,6 +191,13 @@ class VNForge_Image_Marker {
         wp_enqueue_style(
             'vnforge-image-marker-admin',
             VNFORGE_IMAGE_MARKER_PLUGIN_URL . 'assets/css/admin.css',
+            array(),
+            VNFORGE_IMAGE_MARKER_VERSION
+        );
+
+        wp_enqueue_style(
+            'vnforge-image-marker-common',
+            VNFORGE_IMAGE_MARKER_PLUGIN_URL . 'assets/css/common.css',
             array(),
             VNFORGE_IMAGE_MARKER_VERSION
         );
@@ -506,6 +520,8 @@ class VNForge_Image_Marker {
         $marker_color = get_option('vnforge_marker_color', '#ff0000');
         $marker_size = get_option('vnforge_marker_size', '20');
         $custom_css = get_option('vnforge_custom_css', '');
+        $marker_type = get_option('vnforge_marker_type', 'color');
+        $marker_icon = get_option('vnforge_marker_icon', '');
         
         // Build output
         $output = '<div class="vnforge-image-with-markers" data-image-id="' . $image_id . '">';
@@ -518,15 +534,48 @@ class VNForge_Image_Marker {
             $output .= '</script>';
         }
         
+        // Add settings data for JavaScript
+        $output .= '<script type="application/json" class="vnforge-settings-data">';
+        $output .= json_encode(array(
+            'marker_type' => $marker_type,
+            'marker_color' => $marker_color,
+            'marker_size' => $marker_size,
+            'marker_icon' => $marker_icon
+        ));
+        $output .= '</script>';
+        
         $output .= '</div>';
 
-        $css = "
-        .vnforge-marker {
-            background-color: {$marker_color} !important;
-            width: {$marker_size}px !important;
-            height: {$marker_size}px !important;
+        // Generate CSS based on marker type
+        if ($marker_type === 'color') {
+            $css = "
+            .vnforge-marker {
+                background-color: {$marker_color} !important;
+                width: {$marker_size}px !important;
+                height: {$marker_size}px !important;
+            }
+            ";
+        } else {
+            if (!empty($marker_icon)) {
+                $css = "
+                .vnforge-marker {
+                    background-color: transparent !important;
+                    background-image: url('{$marker_icon}') !important;
+                    width: {$marker_size}px !important;
+                    height: {$marker_size}px !important;
+                }
+                ";
+            } else {
+                // Fallback to color if no icon
+                $css = "
+                .vnforge-marker {
+                    background-color: {$marker_color} !important;
+                    width: {$marker_size}px !important;
+                    height: {$marker_size}px !important;
+                }
+                ";
+            }
         }
-        ";
         
         // Add custom CSS if exists
         if (!empty($custom_css)) {
@@ -553,25 +602,36 @@ class VNForge_Image_Marker {
         }
         
         // Sanitize and save settings
+        $marker_type = sanitize_text_field($_POST['marker_type']);
         $marker_color = sanitize_hex_color($_POST['marker_color']);
         $marker_size = intval($_POST['marker_size']);
+        $marker_icon = esc_url_raw($_POST['marker_icon']);
         $custom_css = sanitize_textarea_field($_POST['custom_css']);
         
+        // Validate marker type
+        if (!in_array($marker_type, array('color', 'icon'))) {
+            $marker_type = 'color';
+        }
+        
         // Validate marker size
-        if ($marker_size < 10 || $marker_size > 50) {
+        if ($marker_size < 10 || $marker_size > 100) {
             $marker_size = 20; // Default value
         }
         
         // Save settings to WordPress options
+        update_option('vnforge_marker_type', $marker_type);
         update_option('vnforge_marker_color', $marker_color);
         update_option('vnforge_marker_size', $marker_size);
+        update_option('vnforge_marker_icon', $marker_icon);
         update_option('vnforge_custom_css', $custom_css);
         
         wp_send_json_success(array(
             'message' => 'Settings saved successfully',
             'settings' => array(
+                'marker_type' => $marker_type,
                 'marker_color' => $marker_color,
                 'marker_size' => $marker_size,
+                'marker_icon' => $marker_icon,
                 'custom_css' => $custom_css
             )
         ));

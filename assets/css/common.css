@@ -1,0 +1,23 @@
+.vnforge-marker {
+    z-index: 11;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.vnforge-marker[data-marker-type="color"] {
+    background-color: #ff0000;
+    border-radius: 50% !important;
+    border: 2px solid #fff !important;
+    width: 20px;
+    height: 20px;
+}
+
+.vnforge-marker[data-marker-type="icon"] {
+    background-color: transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
