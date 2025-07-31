@@ -375,6 +375,8 @@ jQuery(document).ready(function($) {
         var markerColor = $('#vnforge-marker-color').val() || '#ff0000';
         var markerSize = $('#vnforge-marker-size').val() || '20';
         var markerIcon = $('#vnforge-marker-icon').val() || '';
+        var markerPinIcon = $('#vnforge-marker-pin-icon').val() || 'pin1.svg';
+        var markerPinIconValue = $('#vnforge-hidden-marker-pin-icon-value').val() || '';
         
         // Sử dụng trực tiếp giá trị percentage từ markerData
         var left = markerData.x;
@@ -401,26 +403,43 @@ jQuery(document).ready(function($) {
             width: markerSize + 'px',
             height: markerSize + 'px',
         };
-        
+        var marker;
         if (markerType === 'color') {
-            // Color marker
             markerCss.backgroundColor = markerColor;
-        } else {
-            // Icon marker
+            marker = $('<div>', {
+                class: 'vnforge-marker',
+                'data-marker-type': markerType,
+                css: markerCss
+            });
+        } else if (markerType === 'icon') {
             if (markerIcon) {
                 markerCss.backgroundImage = 'url(' + markerIcon + ')';
             } else {
-                // Fallback to color if no icon
                 markerCss.backgroundColor = markerColor;
             }
+            marker = $('<div>', {
+                class: 'vnforge-marker',
+                'data-marker-type': markerType,
+                css: markerCss
+            });
+        } else if (markerType === 'pin') {
+            // SVG inline
+            marker = $('<div>', {
+                class: 'vnforge-marker',
+                'data-marker-type': markerType,
+                css: Object.assign({}, markerCss, {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    background: 'none'
+                })
+            });
+
+            console.log('markerPinIconValue', markerPinIconValue);
+            marker.html(markerPinIconValue);
         }
         
-        var marker = $('<div>', {
-            class: 'vnforge-marker',
-            'data-marker-type': markerType,
-            css: markerCss
-        });
-
         marker.on('click', function(e) {
             e.stopPropagation();
             console.log('Marker clicked', isDragging);
@@ -943,16 +962,28 @@ jQuery(document).ready(function($) {
     /**
      * Toggle marker type settings visibility
      */
-    function toggleMarkerTypeSettings(markerType) {
+    function toggleMarkerTypeSettings() {
+        var markerType = $('input[name="vnforge_marker_type"]:checked').val();
+        console.log('Toggle marker type settings', markerType);
         if (markerType === 'color') {
             $('.vnforge-color-settings').show();
             $('.vnforge-icon-settings').hide();
-        } else {
+            $('.vnforge-pin-settings').hide();
+        } else if (markerType === 'icon') {
             $('.vnforge-color-settings').hide();
             $('.vnforge-icon-settings').show();
+            $('.vnforge-pin-settings').hide();
+        } else if (markerType === 'pin') {
+            $('.vnforge-color-settings').hide();
+            $('.vnforge-icon-settings').hide();
+            $('.vnforge-pin-settings').show();
+        }else{
+            $('.vnforge-color-settings').show();
+            $('.vnforge-icon-settings').hide();
+            $('.vnforge-pin-settings').hide();
         }
     }
-    
+
     /**
      * Open WordPress Media Library for icon upload
      */
@@ -1022,13 +1053,15 @@ jQuery(document).ready(function($) {
      */
     function saveSettings() {
         var settings = {
+            post_id: $('#vnforge-hidden-post-id').val(),
             marker_type: $('input[name="vnforge_marker_type"]:checked').val(),
             marker_color: $('#vnforge-marker-color').val(),
             marker_size: $('#vnforge-marker-size').val(),
             marker_icon: $('#vnforge-marker-icon').val(),
+            marker_pin_icon: $('input[name="vnforge_marker_pin_icon"]:checked').val(),
             custom_css: $('#vnforge-custom-css').val()
         };
-        
+
         // Send AJAX request to save settings
         return new Promise(function(resolve, reject) {
             makeAjaxRequest('vnforge_save_settings', settings, function(response, error) {
@@ -1052,6 +1085,7 @@ jQuery(document).ready(function($) {
         $('#vnforge-marker-color').val('#ff0000');
         $('#vnforge-marker-size').val('20');
         $('#vnforge-marker-icon').val('');
+        $('#vnforge-marker-pin-icon').val('');
         $('#vnforge-custom-css').val('');
         
         // Update UI
@@ -1083,6 +1117,9 @@ jQuery(document).ready(function($) {
                 height: size + 'px',
                 backgroundImage: 'none'
             });
+        } else if (markerType === 'pin') {
+            var pinIconValue = $('#vnforge-hidden-marker-pin-icon-value').val();
+            $('.vnforge-marker').html(pinIconValue);
         } else {
             var iconUrl = $('#vnforge-marker-icon').val();
             
@@ -1117,6 +1154,9 @@ jQuery(document).ready(function($) {
                 height: size + 'px',
                 backgroundImage: 'none'
             });
+        } else if (markerType === 'pin') {
+            var pinIconValue = $('#vnforge-hidden-marker-pin-icon-value').val();
+            $('.vnforge-marker').html(pinIconValue);
         } else {
             var iconUrl = $('#vnforge-marker-icon').val();
             
@@ -1150,5 +1190,37 @@ jQuery(document).ready(function($) {
             $('head').append(styleTag);
         }
     }
+    
+    // Event listener cho việc thay đổi pin icon value
+    $(document).on('change', 'input[name="vnforge_marker_pin_icon"]', function() {
+        var selectedPinIcon = $(this).val();
+        var selectedPinIconContent = $(this).data('content');
+        var markerType = $('input[name="vnforge_marker_type"]:checked').val();
+        
+        if (markerType === 'pin') {
+            // Cập nhật hidden input với SVG content mới
+            $('#vnforge-hidden-marker-pin-icon-value').val(selectedPinIconContent);
+            
+            // Áp dụng SVG content cho tất cả marker pin
+            $('.vnforge-marker[data-marker-type="pin"]').each(function() {
+                $(this).html(selectedPinIconContent);
+            });
+        }
+    });
+    
+    // Event listener cho việc thay đổi marker type
+    $(document).on('change', 'input[name="vnforge_marker_type"]', function() {
+        var markerType = $(this).val();
+        
+        if (markerType === 'pin') {
+            // Khi chuyển sang pin type, áp dụng SVG content hiện tại
+            var pinIconContent = $('#vnforge-hidden-marker-pin-icon-value').val();
+            if (pinIconContent) {
+                $('.vnforge-marker[data-marker-type="pin"]').each(function() {
+                    $(this).html(pinIconContent);
+                });
+            }
+        }
+    });
     
 });

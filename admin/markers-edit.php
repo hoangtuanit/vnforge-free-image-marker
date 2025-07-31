@@ -10,11 +10,18 @@ $image_id = isset($image_id) ? $image_id : '';
 $markers = isset($markers) ? $markers : array();
 
 // Get settings from options
-$marker_color = get_option('vnforge_marker_color', '#ff0000');
-$marker_size = get_option('vnforge_marker_size', '20');
-$custom_css = get_option('vnforge_custom_css', '');
-$marker_type = get_option('vnforge_marker_type', 'color'); // 'color' or 'icon'
-$marker_icon = get_option('vnforge_marker_icon', '');
+$marker_color = get_post_meta($post_id, '_vnforge_marker_color', true);
+$marker_size = get_post_meta($post_id, '_vnforge_marker_size', true);
+$custom_css = get_post_meta($post_id, '_vnforge_custom_css', true);
+$marker_type = get_post_meta($post_id, '_vnforge_marker_type', true); // 'color' or 'icon'
+$marker_icon = get_post_meta($post_id, '_vnforge_marker_icon', true);
+$marker_pin_icon = get_post_meta($post_id, '_vnforge_marker_pin_icon', true);
+$marker_pin_icon_value = file_get_contents(VNFORGE_IMAGE_MARKER_PLUGIN_DIR . 'assets/images/pin/' . $marker_pin_icon);
+
+echo 'marker_pin_icon_value:'. $marker_pin_icon;
+echo '<pre>marker_pin_icon_value:';
+print_r($marker_pin_icon_value);
+echo '</pre>';
 
 ?>
 
@@ -60,8 +67,8 @@ $marker_icon = get_option('vnforge_marker_icon', '');
         <input type="hidden" name="vnforge_post_id" id="vnforge-hidden-post-id" value="<?php echo esc_attr($post_id); ?>">
         <input type="hidden" name="vnforge_image_id" id="vnforge-hidden-image-id" value="<?php echo esc_attr($image_id); ?>">
         <input type="hidden" name="vnforge_markers" id="vnforge-hidden-markers" value="<?php echo esc_attr(json_encode($markers)); ?>">
+        <input type="hidden" name="vnforge_marker_pin_icon_value" id="vnforge-hidden-marker-pin-icon-value" value="<?php echo esc_attr($marker_pin_icon_value); ?>">
     </div>
-
 
     <!-- Settings Section -->
     <div class="vnforge-section">
@@ -71,14 +78,20 @@ $marker_icon = get_option('vnforge_marker_icon', '');
         <div class="vnforge-setting-item">
             <label><?php _e('Marker Type:', 'vnforge-image-marker'); ?></label>
             <div class="vnforge-radio-group">
-                <label class="vnforge-radio-label">
-                    <input type="radio" name="vnforge_marker_type" value="color" <?php checked($marker_type, 'color'); ?>>
-                    <?php _e('Color', 'vnforge-image-marker'); ?>
-                </label>
-                <label class="vnforge-radio-label">
-                    <input type="radio" name="vnforge_marker_type" value="icon" <?php checked($marker_type, 'icon'); ?>>
-                    <?php _e('Icon', 'vnforge-image-marker'); ?>
-                </label>
+                <div class="vnforge-radio-group">
+                    <label class="vnforge-radio-label">
+                        <input type="radio" name="vnforge_marker_type" value="color" <?php checked($marker_type, 'color'); ?>>
+                        <?php _e('Color', 'vnforge-image-marker'); ?>
+                    </label>
+                    <label class="vnforge-radio-label">
+                        <input type="radio" name="vnforge_marker_type" value="icon" <?php checked($marker_type, 'icon'); ?>>
+                        <?php _e('Icon', 'vnforge-image-marker'); ?>
+                    </label>
+                    <label class="vnforge-radio-label">
+                        <input type="radio" name="vnforge_marker_type" value="pin" <?php checked($marker_type, 'pin'); ?>>
+                        <?php _e('Pin Icon', 'vnforge-image-marker'); ?>
+                    </label>
+                </div>
             </div>
             <p class="description"><?php _e('Choose between color or icon for markers', 'vnforge-image-marker'); ?></p>
         </div>
@@ -114,6 +127,25 @@ $marker_icon = get_option('vnforge_marker_icon', '');
                 <p class="description"><?php _e('Upload an icon for markers (PNG, JPG, SVG recommended)', 'vnforge-image-marker'); ?></p>
             </div>
             <!-- .vnforge-setting-item -->
+
+            <!-- Pin Icon Settings (shown when type is pin) -->
+            <div class="vnforge-setting-item vnforge-pin-settings" <?php echo ($marker_type === 'color' || $marker_type === 'icon') ? 'style="display: none;"' : ''; ?>>
+                <label for="vnforge-marker-pin-icon"><?php _e('Pin Icon:', 'vnforge-image-marker'); ?></label>
+                <div class="vnforge-pin-icon-group">
+                    <?php for ($i = 1; $i <= 20; $i++): ?>
+                        <?php 
+                            $pin_icon = 'pin' . $i . '.svg';
+                            $svg_content = file_get_contents(VNFORGE_IMAGE_MARKER_PLUGIN_DIR . 'assets/images/pin/' . $pin_icon);
+                        ?>
+                        <label class="vnforge-pin-icon-item" data-icon="<?php echo esc_attr($pin_icon); ?>">
+                            <?php echo $svg_content ?>
+                            <input type="radio" data-content="<?php echo esc_attr($svg_content); ?>" name="vnforge_marker_pin_icon" value="<?php echo esc_attr($pin_icon); ?>" <?php checked($marker_pin_icon, $pin_icon); ?>>
+                        </label>
+                    <?php endfor; ?>
+                </div>
+                <!-- .vnforge-pin-icon-group -->
+                <p class="description"><?php _e('Choose a pin icon from the available options', 'vnforge-image-marker'); ?></p>
+            </div>
 
             <div class="vnforge-setting-item">
                 <label for="vnforge-marker-size"><?php _e('Marker Size (px):', 'vnforge-image-marker'); ?></label>

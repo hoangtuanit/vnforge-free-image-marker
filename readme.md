@@ -64,8 +64,12 @@ image-marker-plugin/
 GPL v2 or later 
 
 ## Features:
+[+] Add custom CSS
 [] Marker image
-[] Thêm custom css
+    [] Allow choose from suggest icon, apply change color for svg image
+[] Allow select animation for marker
+[] Allow select template show info when hover
+[] Add option allow select range on image
 [] Thêm api get note từ vnforge
 [] Request premium feature
 [] Report error
