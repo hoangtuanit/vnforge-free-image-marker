@@ -3,6 +3,7 @@ jQuery(document).ready(function($) {
     // WordPress Media Library instance
     var mediaUploader;
     const postId = $('#vnforge-hidden-post-id').val();
+    let isDragging = false;
     
     // Initialize admin functionality
     initAdmin();
@@ -422,7 +423,12 @@ jQuery(document).ready(function($) {
 
         marker.on('click', function(e) {
             e.stopPropagation();
-            console.log('Marker clicked', markerData);
+            console.log('Marker clicked', isDragging);
+            if(isDragging){
+                console.log('Dragging, cannot delete marker');
+                return;
+            }
+            
             // open modal
             showMarkerDialog(markerData);
         });
@@ -454,6 +460,7 @@ jQuery(document).ready(function($) {
         // Add delete functionality
         deleteBtn.on('click', function(e) {
             e.stopPropagation();
+          
             deleteMarker(markerContainer, markerData);
         });
         
@@ -495,11 +502,19 @@ jQuery(document).ready(function($) {
                 // Add dragging class
                 $(this).addClass('vnforge-dragging');
                 container.addClass('vnforge-dragging-marker');
+                isDragging = true;
                 console.log('Started dragging marker');
             },
             stop: function(event, ui) {
                 // Remove dragging classes
                 $(this).removeClass('vnforge-dragging');
+                
+                setTimeout(function() {
+                    isDragging = false;
+                }, 500);
+                
+                console.log('Stopped dragging marker');
+
                 container.removeClass('vnforge-dragging-marker');
 
                 var position = ui.position;
